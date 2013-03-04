@@ -68,6 +68,8 @@ public class Server implements Server_int
 		
 		Player player = new Player(login,password,remObj);
 		player.setLogged(true);
+		System.out.println("server side login: " + player.getMe().getLogin() + "\tpass: "+
+				player.getMe().getPassword());
 		players.put(login, player);
 		return CallbackConstants.GOOD;
 	}	
@@ -95,21 +97,6 @@ public class Server implements Server_int
 		Server_int stub = (Server_int) UnicastRemoteObject.exportObject(server, 0);		 
 	    Registry registry = LocateRegistry.createRegistry(12345);
 	    registry.bind("SeaBattle", stub);
-	    //server.testAccount();
-	    Account me = new Account("alex","admin");
-	    //server.Sign_up(me.getLogin(), me.getPassword());
-	    //System.out.print(server.accounts.size()+" "+server.accounts.get(0).getLogin() + "\n");
-	    /* MD5
-	    MessageDigest md;
-		try {
-			md = MessageDigest.getInstance("MD5");
-			String md5 = new String("passwd");
-	        byte[] array = md.digest(md5.getBytes());
-	        System.out.print(new String(array));
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
 		
 	}
 
@@ -141,26 +128,162 @@ public class Server implements Server_int
 
 	@Override
 	public int Turn(Integer x, Integer y, String login) throws RemoteException {
-		// TODO Auto-generated method stub
-		return 0;
+		//TODO: TURN
+		if (!players.containsKey(login))
+			return CallbackConstants.UNAUTORISED_USER;
+		else if (!players.get(login).isPlaying())
+			return CallbackConstants.WRONG_MOVE;
+		Game searchGame = new Game(players.get(login));
+		int searchIndex = games.indexOf(searchGame);
+		if (searchIndex < 0)
+			return CallbackConstants.NO_GAME;
+		else if (!games.get(searchIndex).isStarted())
+			return CallbackConstants.WRONG_MOVE;
+		else if ( !(login.equals(games.get(searchIndex).getPlayers()
+				.get(games.get(searchIndex).getTurn_owner()))))
+				{
+					return CallbackConstants.WRONG_MOVE;
+				}
+		
+		int resultTurn = players.get(players.get(login).getEnemy()).getField().turn(x, y);
+		
+		//IF THE GAME IS OVER
+		if	(players.get(players.get(login).getEnemy()).getField().isOver())
+		{
+			for (Player pl : games.get(searchIndex).getPlayers())
+			{
+				if	(pl.getMe().getLogin().equals(login))
+				{
+					players.get(pl.getMe().getLogin()).setPlaying(false);
+					players.get(pl.getMe().getLogin()).getMe().addWins();
+					userDataBase.addWin(pl.getMe().getLogin());
+					pl.getRemObj().push_end(CallbackConstants.WON);
+				}
+				else
+				{
+					players.get(pl.getMe().getLogin()).setPlaying(false);
+					players.get(pl.getMe().getLogin()).getMe().addLoses();
+					userDataBase.addLose(pl.getMe().getLogin());
+					pl.getRemObj().push_end(CallbackConstants.LOST);
+				}
+			}
+			games.remove(searchIndex);
+		}
+		
+		
+		//IF THE PLAYER MADE THE WRONG MOVE
+		if (resultTurn == Field.bad_return)
+			return CallbackConstants.WRONG_MOVE;
+		
+		if (resultTurn == Field.milk)
+		{
+			//IF THE PLAYER MISSED
+			games.get(searchIndex).nextTurn_owner();
+			for (Player pl : games.get(searchIndex).getPlayers())
+			{
+				if	(pl.getMe().getLogin().equals(login))
+				{
+					pl.getRemObj().push_turn(pl.getField()	, CallbackConstants.I_SHOT
+															, !CallbackConstants.MY_TURN);
+				}
+				else
+				{
+					pl.getRemObj().push_turn(pl.getField()	, !CallbackConstants.I_SHOT
+															, CallbackConstants.MY_TURN);
+				}
+			}
+		}
+		else
+		{
+			//OTHERWISE
+			for (Player pl : games.get(searchIndex).getPlayers())
+			{
+				if	(pl.getMe().getLogin().equals(login))
+				{
+					pl.getRemObj().push_turn(pl.getField()	, CallbackConstants.I_SHOT
+															, CallbackConstants.MY_TURN);
+				}
+				else
+				{
+					pl.getRemObj().push_turn(pl.getField()	, !CallbackConstants.I_SHOT
+															, !CallbackConstants.MY_TURN);
+				}
+			}
+		}
+		return CallbackConstants.GOOD;
 	}
 
 	@Override
 	public int New_game(String me, String enemy) throws RemoteException {
-		// TODO Auto-generated method stub
-		return 0;
+		if (players.containsKey(enemy) && !players.get(enemy).isPlaying())
+		{
+			players.get(enemy).getRemObj().wanna_play(me);
+			return CallbackConstants.WAITING;
+		}
+		return CallbackConstants.BAD;
 	}
 
 	@Override
 	public int Accept(String me, String enemy) throws RemoteException {
-		// TODO Auto-generated method stub
-		return 0;
+		
+		if (!players.get(me).isPlaying() && !players.get(enemy).isPlaying())
+		{
+			Vector<Player> gamers = new Vector<Player>();
+			gamers.add(players.get(enemy));
+			gamers.add(players.get(me));		
+			Game newGame = new Game(gamers);
+			players.get(me).setPlaying(true);
+			players.get(me).setEnemy(enemy);
+			players.get(enemy).setPlaying(true);
+			players.get(enemy).setEnemy(me);
+			players.get(enemy).getRemObj().game_created();
+			players.get(me).getRemObj().game_created();
+			games.add(newGame);
+			return  CallbackConstants.GOOD;
+		}
+		return CallbackConstants.BAD;
 	}
 
+	
+	/*
+	 * CLIENT MUST CHECK THE FIELD
+	 * @see com.seabattle.interfaces.Server_int#Ready(com.seabattle.classes.Field, java.lang.String)
+	 */
 	@Override
 	public int Ready(Field field, String user) throws RemoteException {
-		// TODO Auto-generated method stub
-		return 0;
+		Game searchGame = new Game(players.get(user));
+		int index = games.indexOf(searchGame);
+		if (games.get(index).isStarted())
+		{
+			for (int i=0;i<games.get(index).getPlayers().size();++i)
+			{
+				games.get(index).getPlayers().get(i).getRemObj().push_end(CallbackConstants.CREATION_ERROR);
+				players.get(games.get(index).getPlayers().get(i).getMe().getLogin()).setPlaying(false);
+			}
+			return CallbackConstants.INNER_ERROR;
+		}
+		
+		players.get(user).setReady(true);
+		boolean allReady = true;
+		for (int i=0;i<games.get(index).getPlayers().size();++i)
+		{
+			if (!games.get(index).getPlayers().get(i).isReady())
+			{
+				allReady = false;
+			}
+		}
+		if (allReady)
+		{
+			Game gm = games.get(index);
+			for (int i=0;i<games.get(index).getPlayers().size();++i)
+			{
+				gm.getPlayers().get(i).getRemObj().game_started(
+						gm.getPlayers().get(gm.getTurn_owner())
+						.getMe().getLogin());
+			}
+			return CallbackConstants.GOOD;
+		}
+		return CallbackConstants.WAITING;
 	}
 
 	@Override
@@ -172,21 +295,47 @@ public class Server implements Server_int
 			return CallbackConstants.NO_LEAVE;
 		else
 		{
-			/*	TODO: FINISH LEAVE SOLUTION.
-			Player pl = new Player();
-			pl.getMe().setLogin(login);
-			Game searchGame = new Game(pl, 0);
-			
+			Player pl = players.get(login);
+			Game searchGame = new Game(pl);
 			int searchIndex = games.indexOf(searchGame);
 			if (searchIndex <0)
 				return CallbackConstants.NO_LEAVE;
 			
 			if (games.get(searchIndex).getPlayers().size() >1)
 			{
-				games.remove(games.get(searchIndex).getPlayers().indexOf(pl));
-				
+				int leaverIndex = games.get(searchIndex).getPlayers().indexOf(pl);
+				for (int i = 0;i< games.get(searchIndex).getPlayers().size();++i)
+				{
+					if (i == leaverIndex)
+					{
+						String leaverLogin = games.get(searchIndex).getPlayers().get(leaverIndex).getMe().getLogin();
+						players.get(leaverLogin).getMe().addLoses();
+						players.get(leaverLogin).setPlaying(false);
+						players.get(leaverLogin).setEnemy(new String());
+						userDataBase.addLose(leaverLogin);
+						games.get(searchIndex).getPlayers().get(leaverIndex).getRemObj().push_end(CallbackConstants.LOST);
+					}
+					else
+					{
+						String winnerLogin = games.get(searchIndex).getPlayers().get(i).getMe().getLogin();
+						players.get(winnerLogin).getMe().addWins();
+						players.get(winnerLogin).setPlaying(false);
+						players.get(winnerLogin).setEnemy(new String());
+						userDataBase.addWin(winnerLogin);
+						games.get(searchIndex).getPlayers().get(i).getRemObj().push_end(CallbackConstants.WON);
+					}
+				}
 			}
-			*/
+			else if (games.get(searchIndex).getPlayers().size() == 1)
+			{
+				int FIRST = 0;
+				String winnerLogin = games.get(searchIndex).getPlayers().get(FIRST).getMe().getLogin();
+				players.get(winnerLogin).getMe().addWins();
+				players.get(winnerLogin).setPlaying(false);
+				userDataBase.addWin(winnerLogin);
+				games.get(searchIndex).getPlayers().get(FIRST).getRemObj().push_end(CallbackConstants.WON);
+			}
+			games.remove(searchIndex);
 			return CallbackConstants.GOOD;
 		}
 	}
@@ -194,10 +343,12 @@ public class Server implements Server_int
 	@Override
 	public Account Statistic(String user) throws RemoteException {
 		
-		Account result = new Account();
 		if (players.containsKey(user))
+		{
+			
 			return players.get(user).getMe();
-		return result;
+		}
+		return null;
 		
 	}
 

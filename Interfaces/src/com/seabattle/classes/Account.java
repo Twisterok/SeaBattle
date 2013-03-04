@@ -4,14 +4,14 @@ import java.io.Serializable;
 
 public class Account implements Serializable
 {
-	private String 	login;
-	private String 	password;
-	private String 	Name,Surname,Country;
-	private Integer skill,Age;
-	private byte[]	Avatar;
-	private Integer type;
-	private Integer wins,loses;
-	private Integer	gender;
+	private String 	login;						//1
+	private String 	password;					//2
+	private String 	Name,Surname,Country;		//3-5
+	private Integer skill,Age;					//6-7
+	private byte[]	Avatar;						//8
+	private Integer type;						//9
+	private Integer wins,loses;					//10-11
+	private Integer	gender;						//12
 	
 	
 	public Account(String _login, String _password)
@@ -43,6 +43,7 @@ public class Account implements Serializable
 		this.skill	= SQLConstants.LOW;
 		this.wins 	= 0;
 		this.loses 	= 0;
+		this.setGender(SQLConstants.MALE);
 	}
 	
 	public void setLogin(String _login)
@@ -72,7 +73,11 @@ public class Account implements Serializable
 	public void setWins(Integer wins) {
 		this.wins = wins;
 	}
-
+	public void addWins()
+	{
+		this.wins += 1;
+	}
+	
 	public Integer getLoses() {
 		return loses;
 	}
@@ -80,6 +85,10 @@ public class Account implements Serializable
 	public void setLoses(Integer loses) {
 		this.loses = loses;
 	}	
+	public void addLoses()
+	{
+		this.loses += 1;
+	}
 	
 	@Override
 	public boolean equals(Object other){

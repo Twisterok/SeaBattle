@@ -9,18 +9,12 @@ public class Player {
 	
 	private Account me;
 	private Client_int remObj;
+	private boolean isReady;
 	private boolean isPlaying;
 	private boolean isLogged;
 	private Field	field;
+	private String	enemy;
 	
-	public Player()
-	{
-		me = new Account();
-		remObj = null;
-		isPlaying 	= false;
-		isLogged 	= false;
-		field		= new Field();
-	}
 	public Player(Account _me,Client_int _remObj)
 	{
 		me 			= _me;
@@ -28,15 +22,20 @@ public class Player {
 		isPlaying 	= false;
 		isLogged 	= false;
 		field		= new Field();
+		isReady 	= false;
+		enemy 	 	= new String();
 	}
 	
 	public Player(String _login,String _passwd,Client_int _remObj)
 	{
+		
 		me = new Account(_login,_passwd);
 		remObj = _remObj;
 		isPlaying 	= false;
 		isLogged 	= false;
+		isReady 	= false;
 		field		= new Field();
+		enemy 	 	= new String();
 	}
 	
 	public Account getMe() {
@@ -81,6 +80,20 @@ public class Player {
 	    {
 	    	return false;
 	    }
+	}
+	public boolean isReady() {
+		return isReady;
+	}
+	public void setReady(boolean isReady) {
+		this.isReady = isReady;
+	}
+
+	public String getEnemy() {
+		return enemy;
+	}
+
+	public void setEnemy(String enemy) {
+		this.enemy = enemy;
 	}
 	
 }

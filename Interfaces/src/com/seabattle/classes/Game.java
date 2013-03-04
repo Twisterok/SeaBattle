@@ -5,20 +5,22 @@ import java.util.Vector;
 
 public class Game 
 {
+	public static final int movetime = 45;
+	private boolean			isStarted;
 	private Vector<Player> 	players;
 	private int				turn_owner;
-	//private Timer			timer;
-	//private int				moveTime;
 	
-	public Game(Player _player,int _moveTime)
+	public Game(Player _player)
 	{
+		setStarted(false);
 		players = new Vector<Player>();
 		players.add(_player);
 		turn_owner = 0;
 	}
 	
-	public Game(Vector<Player> _players,int _moveTime)
+	public Game(Vector<Player> _players)
 	{
+		setStarted(false);
 		players = _players;
 		//moveTime = _moveTime;
 		turn_owner = 0;
@@ -44,6 +46,12 @@ public class Game
 		return turn_owner;
 	}	
 	
+	public void nextTurn_owner()
+	{
+		this.turn_owner +=1;
+		this.turn_owner = turn_owner%2;
+	}
+	
 	@Override
 	public boolean equals(Object other){
 	    if (other == null) return false;
@@ -59,5 +67,13 @@ public class Game
 	    {
 	    	return false;
 	    }
+	}
+
+	public boolean isStarted() {
+		return isStarted;
+	}
+
+	public void setStarted(boolean isStarted) {
+		this.isStarted = isStarted;
 	}
 }

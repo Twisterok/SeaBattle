@@ -39,8 +39,8 @@ public class DatabaseAdapter {
 											"age		INTEGER," +
 											"country	VARCHAR(50)," +
 											"avatar		BLOB," +
-											"type		INTEGER" +
-											"gender		VARCHAR(10));");
+											"type		INTEGER," +
+											"gender		INTEGER);");
 			statement.executeUpdate();
 			System.out.println("CREATED");
 		}
@@ -279,7 +279,9 @@ public class DatabaseAdapter {
 		try {
 			if (!(newAccount.getAvatar() == null))
 			{
-				statement = bd.prepareStatement("INSERT INTO accounts VALUES(?,?,?,?,?,?,?,?,?,?,?,?);");
+				statement = bd.prepareStatement("insert into accounts " +
+						"(login, password, wins, loses, skill, name, surname, age, country, avatar, type, gender)" +
+						" values(?,?,?,?,?,?,?,?,?,?,?,?);");
 				statement.setString(1, newAccount.getLogin());
 				statement.setBytes(2, newAccount.getPassword().getBytes());
 				statement.setInt(3, newAccount.getWins());
@@ -299,11 +301,13 @@ public class DatabaseAdapter {
 				//baos.close();
 				
 				//statement.setBytes(10, imageInByte);
-				statement.executeUpdate();
+				statement.execute();
 			}
 			else
 			{
-				statement = bd.prepareStatement("INSERT INTO accounts VALUES(?,?,?,?,?,?,?,?,?,NULL,NULL,?);");
+				statement = bd.prepareStatement("insert into accounts " +
+						"(login, password, wins, loses, skill, name, surname, age, country, avatar, type, gender)" +
+						" values(?,?,?,?,?,?,?,?,?,?,?,?);");
 				statement.setString(1, newAccount.getLogin());
 				statement.setBytes(2, newAccount.getPassword().getBytes());
 				statement.setInt(3, newAccount.getWins());
@@ -313,11 +317,14 @@ public class DatabaseAdapter {
 				statement.setString(7, newAccount.getSurname());
 				statement.setInt(8, newAccount.getAge());
 				statement.setString(9, newAccount.getCountry());
-				statement.setInt(10, newAccount.getGender());
-				statement.executeUpdate();
+				statement.setNull(10, java.sql.Types.BLOB);
+				statement.setNull(11, java.sql.Types.INTEGER);
+				statement.setInt(12, newAccount.getGender());
+				statement.execute();
 			}
 		} catch (SQLException e) {
 			System.out.println("ADDING ACCOUNT: Bad SQL QUERY");
+			e.printStackTrace();
 			return CallbackConstants.BAD;
 		}	
 		return CallbackConstants.GOOD;

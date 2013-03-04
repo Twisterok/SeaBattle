@@ -70,6 +70,7 @@ public class Field
 			}
 		}
 	}
+	
 	/*----------------------------------------------------------------------------------
 	 * FUNCTION: 	turn(int,int)
 	 * DESCRIPTION:	tries to shoot to the position and change the field then
@@ -195,5 +196,38 @@ public class Field
 		}
 		
 		return bad_return;
-	}	
+	}
+	
+	
+	
+	
+	/*----------------------------------------------------------------------------------
+	 * FUNCTION: 	isOver()
+	 * DESCRIPTION:	Checks game is over or not 
+	 * 			a)	there is no free field
+	 * 			b) 	there is no alive ship
+	 * 
+	 * RETURNS:		TRUE			-	if the game is over
+	 * 				FALSE			-	otherwise
+	 -----------------------------------------------------------------------------------*/
+	public boolean isOver()
+	{
+		for (int i=0;i<this.fSize;++i)
+		{
+			for (int j =0;j<this.fSize;++j)
+			{
+				int curValue = this.getField().get(i).get(j);
+				if (curValue == Field.free 		||
+					curValue == Field.submarine ||
+					curValue == Field.destroyer ||
+					curValue == Field.cruiser 	||
+					curValue == Field.battleship)
+				{
+					return false;
+				}
+			}
+				
+		}
+		return true;
+	}
 }

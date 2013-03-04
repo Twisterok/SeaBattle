@@ -1,11 +1,15 @@
 package com.seabattle.classes;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 public class CallbackConstants {
 	public static final int GOOD				=200;		//ОК
 	public static final int UST					=201;		//Статистика
 	public static final int	GLS					=202;		//Список игр
 	public static final int GAME_CREATED		=203;		//Игра создана
 	public static final int GAME_STATE			=204;		//Текущее состояние игры
+	public static final int WAITING				=205;
 	public static final int USER_EXISTS			=400;		//Пользователь уже существует
 	public static final int	WRONG_PARAMETR		=401;		//Неверный параметр
 	public static final int INNER_ERROR			=402;		//Внутренняя ошибка
@@ -19,4 +23,28 @@ public class CallbackConstants {
 	public static final int USER_PLAYS			=410;		//Пользователь еще в игре
 	public static final int BAD					=500;		//Плохо
 	
+	public static final int WON		 			= 600;		//Присвоилась победа
+	public static final int LOST	 			= 601;		//Присвоилось поражение
+	public static final int DECLINED			= 602;		//Отклонил.
+	public static final int CREATION_ERROR		= 603;		//Косяк при создании
+	
+	public static final boolean MY_TURN			= true;
+	public static final boolean I_SHOT			= true;
+	
+	public static byte[] toMD5(String pass)
+	{
+		 MessageDigest md;
+		 try 
+		 {
+			md = MessageDigest.getInstance("MD5");
+			String md5 = new String("passwd");
+		    byte[] array = md.digest(md5.getBytes());
+		    return array;
+		} 
+		catch (NoSuchAlgorithmException e) 
+		{
+			e.printStackTrace();
+			return null;
+		}
+	}
 }	
