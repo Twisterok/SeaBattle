@@ -20,7 +20,8 @@ public class Server implements Server_int
 	Vector<Account>		accounts;
 	Vector<Game>		games;
 	DatabaseAdapter		userDataBase;
-	
+	Chatroom			mainChatRoom;
+	Vector<Chatroom>	privateChats;
 	Server()
 	{
 		super();
@@ -40,8 +41,8 @@ public class Server implements Server_int
 		
 		players 	= new HashMap<String,Player>();		
 		games 		= new Vector<Game>(); 
-		
-		
+		mainChatRoom= new Chatroom();
+		privateChats= new Vector<Chatroom>();
 		
 	}
 	
@@ -71,6 +72,7 @@ public class Server implements Server_int
 		System.out.println("server side login: " + player.getMe().getLogin() + "\tpass: "+
 				player.getMe().getPassword());
 		players.put(login, player);
+		mainChatRoom.addUser(player);
 		return CallbackConstants.GOOD;
 	}	
 	
@@ -92,12 +94,16 @@ public class Server implements Server_int
 		return userDataBase.deleteAccount(toDelete);
 	}
 	
+	/*----------------------------------------------*
+	 * ############################################ * 												*
+	 * -----------------[ MAIN ]--------------------*
+	 * ############################################ *												*
+	 *----------------------------------------------*/
 	public static void main(String[] args) throws RemoteException, AlreadyBoundException, ClassNotFoundException, SQLException {		
 		Server server = new Server();
 		Server_int stub = (Server_int) UnicastRemoteObject.exportObject(server, 0);		 
 	    Registry registry = LocateRegistry.createRegistry(12345);
 	    registry.bind("SeaBattle", stub);
-		
 	}
 
 	@Override
@@ -122,6 +128,8 @@ public class Server implements Server_int
 		{
 			return CallbackConstants.USER_PLAYS;
 		}
+		if (mainChatRoom.removeUser(players.get(login)) == CallbackConstants.BAD)
+			return CallbackConstants.BAD;
 		players.remove(login);
 		return CallbackConstants.GOOD;
 	}
@@ -225,7 +233,7 @@ public class Server implements Server_int
 
 	@Override
 	public int Accept(String me, String enemy) throws RemoteException {
-		
+		//	TODO: NEW CHATROOM
 		if (!players.get(me).isPlaying() && !players.get(enemy).isPlaying())
 		{
 			Vector<Player> gamers = new Vector<Player>();
@@ -289,6 +297,7 @@ public class Server implements Server_int
 	@Override
 	public int Leave(String login) throws RemoteException {
 		
+		//TODO:	LEAVE FROM CHATROOM
 		if (!players.containsKey(login) || !players.get(login).isLogged())
 			return CallbackConstants.UNAUTORISED_USER;
 		else if (!players.get(login).isPlaying())
@@ -298,6 +307,8 @@ public class Server implements Server_int
 			Player pl = players.get(login);
 			Game searchGame = new Game(pl);
 			int searchIndex = games.indexOf(searchGame);
+
+			
 			if (searchIndex <0)
 				return CallbackConstants.NO_LEAVE;
 			

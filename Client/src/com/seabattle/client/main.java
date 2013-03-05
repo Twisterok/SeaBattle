@@ -27,13 +27,17 @@ public class main implements Client_int{
 	
 	public static void main(String[] args) throws AccessException, RemoteException, NotBoundException {
 		
-		  main client = new main();
-		  Client_int stub = (Client_int) UnicastRemoteObject.exportObject(client,0);
+		
+			Client cl = new Client();
+			
+		  //main client = new main();
+		  //Client_int stub = (Client_int) UnicastRemoteObject.exportObject(client,0);
 		  
-		  Registry registry = LocateRegistry.getRegistry("127.0.0.1", 12345);
-	      Server_int server = (Server_int)registry.lookup("SeaBattle");
+		  //Registry registry = LocateRegistry.getRegistry("127.0.0.1", 12345);
+	      //Server_int server = (Server_int)registry.lookup("SeaBattle");
 	      
-	      if (server.Sign_up("alex", new String(CallbackConstants.toMD5("admin"))) == CallbackConstants.GOOD)
+
+	      /*if (server.Sign_up("alex", new String(CallbackConstants.toMD5("admin"))) == CallbackConstants.GOOD)
 	      {
 	    	  System.out.println("signed up");
 	    	  if (server.Sign_in("alex", new String(CallbackConstants.toMD5("admin")), stub) == CallbackConstants.GOOD)
@@ -63,6 +67,9 @@ public class main implements Client_int{
 	      }
 	      //
 	      //System.out.println("login: " + myAcc.getName() + "\tpass: "+ myAcc.getPassword());
+	      */
+	      
+	      
 	      
 	}
 
@@ -99,9 +106,12 @@ public class main implements Client_int{
 
 
 	@Override
-	public int push_turn(Field curField, boolean isMe) throws RemoteException {
+	public int push_turn(Field curField, boolean myTurn, boolean myField)
+			throws RemoteException {
 		// TODO Auto-generated method stub
 		return 0;
 	}
+
+
 
 }
