@@ -15,23 +15,28 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.plaf.FontUIResource;
 
+import com.seabattle.interfaces.Server_int;
+
 public class LoginPanel extends JPanel
 {
-	JTextField 		login,password;
+	JTextField 		login;
+	JPasswordField	password;
 	JLabel			login_lbl,password_lbl;
 	JButton			login_but,register_but;
 	BufferedImage	image;
-	
-	public LoginPanel() {
+	Server_int		server;
+	public LoginPanel(Server_int _server) {
 		
+		server = _server;
 		this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		this.setAlignmentX(CENTER_ALIGNMENT);
 		
 		try {
-			image = ImageIO.read(new File("req.jpg"));
+			image = ImageIO.read(new File("exmp.jpg"));
 			         
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(this, "Sorry inner error. No such file: \"Seabattle_loadup.jpg\"");
@@ -40,7 +45,7 @@ public class LoginPanel extends JPanel
 		
 		login 		= new JTextField();
 		login.setPreferredSize(new Dimension(175,25));
-		password	= new JTextField();
+		password	= new JPasswordField();
 		password.setPreferredSize(new Dimension(175,25));
 		
 		login_but	= new JButton("Sign in");
@@ -50,12 +55,12 @@ public class LoginPanel extends JPanel
 		register_but.setPreferredSize(new Dimension(100, 40));
 		
 		
-		login_lbl 	= new JLabel("Login");
+		login_lbl 	= new JLabel();//("Login");
 		login_lbl.setPreferredSize(new Dimension(80,25));
 		login_lbl.setForeground(Color.WHITE);
 		login_lbl.setFont(new Font(null, Font.ITALIC, 18));
 		
-		password_lbl= new JLabel("Password");
+		password_lbl= new JLabel();//("Password");
 		password_lbl.setPreferredSize(new Dimension(80,25));
 		password_lbl.setForeground(Color.WHITE);
 		password_lbl.setFont(new Font(null, Font.ITALIC, 18));
@@ -108,11 +113,17 @@ public class LoginPanel extends JPanel
 		mover = new JPanel();
 		mover.setOpaque(false);
 
-
+		//this.add(mover);
+		//mover = new JPanel();
+		//mover.setOpaque(false);
+		
+		
 		// ADDING MAIN PANELS
 		this.add(loginPan);
 		this.add(passwordPan);
 		this.add(buttonsPan);
+		
+		//ADDING MOVERS
 		this.add(mover);
 		mover = new JPanel();
 		mover.setOpaque(false);
@@ -122,6 +133,11 @@ public class LoginPanel extends JPanel
 		mover.setOpaque(false);
 		
 		this.add(mover);
+		
+		
+		
+		
+		
 				
 	}
 	

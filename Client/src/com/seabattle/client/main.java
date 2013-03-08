@@ -28,14 +28,14 @@ public class main implements Client_int{
 	public static void main(String[] args) throws AccessException, RemoteException, NotBoundException {
 		
 		
-			Client cl = new Client();
 			
-		  //main client = new main();
-		  //Client_int stub = (Client_int) UnicastRemoteObject.exportObject(client,0);
+		  main client = new main();
+		  Client_int stub = (Client_int) UnicastRemoteObject.exportObject(client,0);
 		  
-		  //Registry registry = LocateRegistry.getRegistry("127.0.0.1", 12345);
-	      //Server_int server = (Server_int)registry.lookup("SeaBattle");
+		  Registry registry = LocateRegistry.getRegistry("127.0.0.1", 12345);
+	      Server_int server = (Server_int)registry.lookup("SeaBattle");
 	      
+	      Client GUI = new Client(server);
 
 	      /*if (server.Sign_up("alex", new String(CallbackConstants.toMD5("admin"))) == CallbackConstants.GOOD)
 	      {
