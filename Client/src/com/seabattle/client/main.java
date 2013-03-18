@@ -35,7 +35,7 @@ public class main implements Client_int{
 		  Registry registry = LocateRegistry.getRegistry("127.0.0.1", 12345);
 	      Server_int server = (Server_int)registry.lookup("SeaBattle");
 	      
-	      Client GUI = new Client(server);
+	      Client GUI = new Client(server,client);
 
 	      /*if (server.Sign_up("alex", new String(CallbackConstants.toMD5("admin"))) == CallbackConstants.GOOD)
 	      {
@@ -109,6 +109,14 @@ public class main implements Client_int{
 	public int push_turn(Field curField, boolean myTurn, boolean myField)
 			throws RemoteException {
 		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public int push_message(String message, boolean isMain)
+			throws RemoteException {
+		//TODO: PUSH MESSAGE
 		return 0;
 	}
 

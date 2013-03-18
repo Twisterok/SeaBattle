@@ -39,12 +39,13 @@ import com.seabattle.classes.Field;
 
 public interface Client_int extends Remote {
 	
-	boolean hello()							throws RemoteException;
+	boolean hello()									throws RemoteException;
 	int push_turn(Field curField
 					,boolean myTurn
-					,boolean myField)		throws RemoteException;
-	int push_end(Integer description)		throws RemoteException;
-	int wanna_play(String creator)			throws RemoteException;
-	int game_created()						throws RemoteException;
-	int game_started(String turnOwner)		throws RemoteException;
+					,boolean myField)				throws RemoteException;
+	int push_end(Integer description)				throws RemoteException;
+	int push_message(String message,boolean isMain)	throws RemoteException;
+	int wanna_play(String creator)					throws RemoteException;
+	int game_created()								throws RemoteException;
+	int game_started(String turnOwner)				throws RemoteException;
 }

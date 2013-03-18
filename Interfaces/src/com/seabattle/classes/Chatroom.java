@@ -34,7 +34,7 @@ public class Chatroom {
 	
 	public int addUser(Player newUser)
 	{
-		if (users.indexOf(newUser) < 0)
+		if (users.indexOf(newUser) >= 0)
 			return CallbackConstants.BAD;
 		users.add(newUser);
 		return CallbackConstants.GOOD;

@@ -27,9 +27,11 @@ public class CallbackConstants {
 	public static final int LOST	 			= 601;		//Присвоилось поражение
 	public static final int DECLINED			= 602;		//Отклонил.
 	public static final int CREATION_ERROR		= 603;		//Косяк при создании
-	
+		
 	public static final boolean MY_TURN			= true;
 	public static final boolean I_SHOT			= true;
+	
+	public static final boolean MAINCHAT		= true;
 	
 	public static byte[] toMD5(String pass)
 	{
@@ -40,6 +42,23 @@ public class CallbackConstants {
 			String md5 = new String("passwd");
 		    byte[] array = md.digest(md5.getBytes());
 		    return array;
+		} 
+		catch (NoSuchAlgorithmException e) 
+		{
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public static String toMD5_String(String pass)
+	{
+		 MessageDigest md;
+		 try 
+		 {
+			md = MessageDigest.getInstance("MD5");
+			String md5 = new String("passwd");
+		    byte[] array = md.digest(md5.getBytes());
+		    return new String(array);
 		} 
 		catch (NoSuchAlgorithmException e) 
 		{

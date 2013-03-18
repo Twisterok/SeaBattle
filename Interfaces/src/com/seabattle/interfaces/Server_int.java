@@ -156,7 +156,7 @@ public interface Server_int extends Remote
 	int Accept	(String me,String enemy)						throws RemoteException;
 	int Ready	(Field field, String user)						throws RemoteException;
 	int Leave	(String login)									throws RemoteException;
-
+	int Send	(String login,String message,boolean isMain)	throws RemoteException;
 	
 	
 	/*
@@ -169,6 +169,11 @@ public interface Server_int extends Remote
 	int		Change_password(String login,byte[] password)		throws RemoteException;
 	int		Change_avatar(String login,byte[] avatar)			throws RemoteException;
 	int		Set_type(String login,Integer type)					throws RemoteException;
+	int		Change_skill(String login,Integer newSkill)			throws RemoteException;
 	int		Change_gender(String login,Integer newGender)		throws RemoteException;
 	Account Statistic(String user)								throws RemoteException;
+	
+	
+	//TEST
+	byte[] getAvatar(String login)								throws RemoteException;
 }

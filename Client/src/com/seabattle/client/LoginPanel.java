@@ -4,9 +4,13 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.rmi.RemoteException;
+import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 import javax.jws.soap.SOAPBinding.Style;
@@ -19,9 +23,11 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.plaf.FontUIResource;
 
+import com.seabattle.classes.CallbackConstants;
+import com.seabattle.interfaces.Client_int;
 import com.seabattle.interfaces.Server_int;
 
-public class LoginPanel extends JPanel
+public class LoginPanel extends JPanel	implements ActionListener
 {
 	JTextField 		login;
 	JPasswordField	password;
@@ -29,9 +35,13 @@ public class LoginPanel extends JPanel
 	JButton			login_but,register_but;
 	BufferedImage	image;
 	Server_int		server;
-	public LoginPanel(Server_int _server) {
+	Client_int		me;
+	Client			parent;
+	public LoginPanel(Server_int _server,Client_int _me,Client _parent) {
 		
-		server = _server;
+		parent	= _parent;
+		server 	= _server;
+		me		= _me;
 		this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		this.setAlignmentX(CENTER_ALIGNMENT);
 		
@@ -50,10 +60,11 @@ public class LoginPanel extends JPanel
 		
 		login_but	= new JButton("Sign in");
 		login_but.setPreferredSize(new Dimension(100, 40));
+		login_but.addActionListener(this);
 		
 		register_but= new JButton("Register");
 		register_but.setPreferredSize(new Dimension(100, 40));
-		
+		register_but.addActionListener(this);
 		
 		login_lbl 	= new JLabel();//("Login");
 		login_lbl.setPreferredSize(new Dimension(80,25));
@@ -146,4 +157,54 @@ public class LoginPanel extends JPanel
         super.paintComponent(g);
         g.drawImage(image, 0, 0,getWidth(),getHeight(),null);
         }
+	
+	
+	 public void actionPerformed(ActionEvent e) {
+		 if(e.getSource() == login_but)
+		 { 
+			 if (login.getText().length() != 0	&&
+				password.getPassword().length != 0)
+			 {
+				 String pass = CallbackConstants.toMD5_String(password.getPassword().toString());
+				 String log = login.getText();
+				 try {
+					int callback = server.Sign_in(log, pass, me);
+					switch (callback)
+					{
+					case CallbackConstants.AUTORISATION_ERROR:
+						JOptionPane.showMessageDialog(this, "ERROR: Authorisation error");
+						break;
+					case CallbackConstants.USER_ONLINE:
+						JOptionPane.showMessageDialog(this, "ERROR: User is already online");
+						break;
+					case CallbackConstants.GOOD:
+						JOptionPane.showMessageDialog(this, "ERROR: LOGGED IN");
+						
+						if (server.Sign_out(log) == CallbackConstants.GOOD)
+						{
+							JOptionPane.showMessageDialog(this, "ERROR: LOGGED OUT");
+						}
+						else
+						{
+							JOptionPane.showMessageDialog(this, "ERROR: FAILED");
+						}
+						//...
+						break;
+					}
+						
+				} catch (RemoteException e1) {
+					JOptionPane.showMessageDialog(this, "ERROR: Remote invocation error"); 
+					e1.printStackTrace();
+				}
+			 }
+			 else
+			 {
+				 JOptionPane.showMessageDialog(this, "ERROR: Enter your login and password please.");
+			 }
+		 }
+		 else if (e.getSource() == register_but)
+		 {
+			 parent.ShowRegisterPane();
+		 }
+	 }
 }

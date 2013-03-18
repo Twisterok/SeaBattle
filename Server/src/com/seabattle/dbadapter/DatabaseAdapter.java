@@ -203,6 +203,23 @@ public class DatabaseAdapter {
 		
 		return CallbackConstants.GOOD;
 	}
+	
+	public int changeSkill(String login,Integer newSkill)
+	{
+		PreparedStatement statement;
+		try {
+			statement = bd.prepareStatement("UPDATE accounts SET skill = ? " +
+					"where login = ?;");
+			statement.setInt(1, newSkill);
+			statement.setString(2, login);
+			statement.executeUpdate();
+		} catch (SQLException e) {
+			System.out.println("CHANGING SKILL: Bad SQL QUERY");
+			return CallbackConstants.BAD;
+		}
+		
+		return CallbackConstants.GOOD;
+	}
 
 	public int changeAvatar(String login,byte[] avatar)
 	{
@@ -368,5 +385,23 @@ public class DatabaseAdapter {
 		}
 		
 		return CallbackConstants.GOOD;
+	}
+	
+	public byte[] getAvatar(String login)
+	{
+		PreparedStatement statement;
+		try {
+			statement = bd.prepareStatement("SELECT avatar from accounts " +
+					"where login = ?;");
+			
+			statement.setString(1, login);
+			statement.execute();
+			rs = statement.getResultSet();
+			byte[] res = rs.getBytes("avatar");
+			return res;
+		} catch (SQLException e) {
+			System.out.println("GETTING AVATAR: Bad SQL QUERY OR IMAGE CONVERSION ERROR\n");
+			return null;
+		}
 	}
 }

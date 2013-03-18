@@ -1,5 +1,8 @@
 package com.seabattle.server;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.RemoteException;
@@ -9,6 +12,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.*;
+
+import javax.imageio.ImageIO;
+
 import com.seabattle.classes.*;
 import com.seabattle.dbadapter.DatabaseAdapter;
 import com.seabattle.interfaces.*;
@@ -72,7 +78,8 @@ public class Server implements Server_int
 		System.out.println("server side login: " + player.getMe().getLogin() + "\tpass: "+
 				player.getMe().getPassword());
 		players.put(login, player);
-		mainChatRoom.addUser(player);
+		mainChatRoom.addUser(players.get(login));
+		
 		return CallbackConstants.GOOD;
 	}	
 	
@@ -104,6 +111,17 @@ public class Server implements Server_int
 		Server_int stub = (Server_int) UnicastRemoteObject.exportObject(server, 0);		 
 	    Registry registry = LocateRegistry.createRegistry(12345);
 	    registry.bind("SeaBattle", stub);
+	    /*byte[] img = server.getAvatar("admin");
+	    ByteArrayInputStream bais = new ByteArrayInputStream(img);
+	    BufferedImage imgg;
+		try {
+			imgg = ImageIO.read(bais);
+			ImageIO.write(imgg, "jpg", new File("kakos.jpg"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+	    
 	}
 
 	@Override
@@ -120,16 +138,24 @@ public class Server implements Server_int
 	@Override
 	public int Sign_out(String login) throws RemoteException {
 		
+		System.out.print("logging out: "+players.get(login).getMe().getLogin()+"\n");
 		if (!players.containsKey(login) || !players.get(login).isLogged())
 		{
+			System.out.print("UNAUTHORISED: "+login+"\n");
 			return CallbackConstants.UNAUTORISED_USER;
 		}
 		else if (players.get(login).isPlaying())
 		{
+			System.out.print("PLAYING: "+login+"\n");
 			return CallbackConstants.USER_PLAYS;
 		}
+		
 		if (mainChatRoom.removeUser(players.get(login)) == CallbackConstants.BAD)
+		{
+			System.out.print("CHATROOM: "+login+"\n");
+			
 			return CallbackConstants.BAD;
+		}
 		players.remove(login);
 		return CallbackConstants.GOOD;
 	}
@@ -499,9 +525,59 @@ public class Server implements Server_int
 	}
 	
 	
+	@Override
+	public int Change_skill(String login, Integer newSkill)
+			throws RemoteException {
+		
+		int index = accounts.indexOf(new Account(login,"blank"));
+		if (index >0)
+		{
+			int res = userDataBase.changeSkill(login, newSkill);
+			if (res == CallbackConstants.GOOD)
+			{
+				accounts.get(index).setSkill(newSkill);
+				return res;
+			}
+		}
+		return CallbackConstants.BAD;
+	}
 	
-	
-	
+	@Override
+	public byte[] getAvatar(String login) throws RemoteException {
+		return userDataBase.getAvatar(login);		
+	}
+
+	@Override
+	public int Send(String login,String message, boolean isMain) throws RemoteException {
+		
+		if (isMain)
+		{
+			this.mainChatRoom.newMessage(message);
+			for (int i=0;i<mainChatRoom.getUsers().size();++i)
+			{
+				StringBuffer sb = new StringBuffer();
+				sb.append(login);
+				sb.append(": ");
+				sb.append(message+"\n");
+				mainChatRoom.getUsers().get(i).getRemObj().push_message(sb.toString(), isMain);
+			}
+		}
+		else
+		{
+			Chatroom searchChat = new Chatroom(players.get(login));
+			int searchIndex = privateChats.indexOf(searchChat);
+			for (int i=0;i<privateChats.get(searchIndex).getUsers().size();++i)
+			{
+				StringBuffer sb = new StringBuffer();
+				sb.append(login);
+				sb.append(": ");
+				sb.append(message+"\n");
+				privateChats.get(searchIndex).getUsers().get(i).getRemObj()
+								.push_message(sb.toString(), isMain);
+			}
+		}
+		return 0;
+	}
 	
 	
 	
@@ -526,4 +602,8 @@ public class Server implements Server_int
 		srv.deleteAccount(newAcc.getLogin());
 		System.out.println("After delete - accounts size = "+srv.accounts.size());
 	}
+
+	
+
+
 }
