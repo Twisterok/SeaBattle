@@ -83,6 +83,16 @@ public class Server implements Server_int
 		return CallbackConstants.GOOD;
 	}	
 	
+	int register(Account newAccount)
+	{
+		if (accountExists(newAccount.getLogin()))
+		{
+			return CallbackConstants.USER_EXISTS;
+		}	
+		accounts.add(newAccount);
+		return userDataBase.addAccount(newAccount);
+	}
+	
 	int register(String login,String password)
 	{
 		if (accountExists(login))
@@ -601,6 +611,11 @@ public class Server implements Server_int
 		System.out.println("After add  - accounts size = "+srv.accounts.size());
 		srv.deleteAccount(newAcc.getLogin());
 		System.out.println("After delete - accounts size = "+srv.accounts.size());
+	}
+
+	@Override
+	public int Register(Account newAccount) throws RemoteException {
+		return register(newAccount);
 	}
 
 	

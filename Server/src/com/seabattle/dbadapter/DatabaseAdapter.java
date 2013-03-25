@@ -90,9 +90,6 @@ public class DatabaseAdapter {
 			byte[] ImgBytesArr = rs.getBytes("avatar");
 			if (!rs.wasNull())
 			{
-				//byte[] img;
-				//ByteArrayInputStream bais = new ByteArrayInputStream(ImgBytesArr);
-				//img = ImageIO.read(bais);
 				curAccount.setAvatar(ImgBytesArr);
 				Integer type = rs.getInt("type");
 				curAccount.setType(type);
@@ -290,12 +287,13 @@ public class DatabaseAdapter {
 		return CallbackConstants.GOOD;
 	}
 
-	public int addAccount(Account newAccount)
+	public int addAccount(Account newAccount) 
 	{
 		PreparedStatement statement;
 		try {
 			if (!(newAccount.getAvatar() == null))
 			{
+				System.out.print("ING IS NULL\n");
 				statement = bd.prepareStatement("insert into accounts " +
 						"(login, password, wins, loses, skill, name, surname, age, country, avatar, type, gender)" +
 						" values(?,?,?,?,?,?,?,?,?,?,?,?);");
@@ -322,6 +320,7 @@ public class DatabaseAdapter {
 			}
 			else
 			{
+				System.out.print("ING ISN'T NULL\n");
 				statement = bd.prepareStatement("insert into accounts " +
 						"(login, password, wins, loses, skill, name, surname, age, country, avatar, type, gender)" +
 						" values(?,?,?,?,?,?,?,?,?,?,?,?);");
@@ -334,8 +333,13 @@ public class DatabaseAdapter {
 				statement.setString(7, newAccount.getSurname());
 				statement.setInt(8, newAccount.getAge());
 				statement.setString(9, newAccount.getCountry());
-				statement.setNull(10, java.sql.Types.BLOB);
-				statement.setNull(11, java.sql.Types.INTEGER);
+				BufferedImage img;
+				img = ImageIO.read(new File("unknown_user.jpg"));
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				ImageIO.write(img, "jpg", baos);
+				baos.flush();
+				statement.setBytes(10, baos.toByteArray());
+				statement.setInt(11, SQLConstants.JPG);
 				statement.setInt(12, newAccount.getGender());
 				statement.execute();
 			}
@@ -343,6 +347,9 @@ public class DatabaseAdapter {
 			System.out.println("ADDING ACCOUNT: Bad SQL QUERY");
 			e.printStackTrace();
 			return CallbackConstants.BAD;
+		} catch (IOException e) {
+			System.out.println("IMG TO BYTES IS FucKED OFF");
+			e.printStackTrace();
 		}	
 		return CallbackConstants.GOOD;
 	}

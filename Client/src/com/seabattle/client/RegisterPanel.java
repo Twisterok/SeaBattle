@@ -29,6 +29,7 @@ import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.plaf.SliderUI;
 
+import com.seabattle.classes.Account;
 import com.seabattle.classes.CallbackConstants;
 import com.seabattle.classes.SQLConstants;
 import com.seabattle.interfaces.Server_int;
@@ -251,22 +252,10 @@ public class RegisterPanel extends JPanel implements ActionListener{
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		
-		/*
-		 * 	BufferedImage		background;
-			JTextField 			login;
-			JPasswordField		password;
-			JPasswordField		retype;
-			JTextField 			Name;
-			JTextField 			Surname;
-			JComboBox<String>	Country;
-			JComboBox<String>	Skill;
-			JSpinner			Age;
-			JFileChooser		Avatar;
-			JRadioButton		Male,Female;
-		 */
 		if (e.getSource() ==Register)
 		{
+			
+			
 			if (login.getText().length() == 0)
 			{
 				JOptionPane.showMessageDialog(this, "ERROR: Enter the login");
@@ -285,12 +274,65 @@ public class RegisterPanel extends JPanel implements ActionListener{
 			}
 			else
 			{
+				Account	newAccount = new Account();
 				String pass = CallbackConstants.toMD5_String(password.getPassword().toString());
 				String log 	= login.getText();
 				
+				//----------------
+				newAccount.setLogin(log);
+				newAccount.setPassword(pass);
+				//----------------
+				
 				try {
-					int callback = server.Sign_up(log, pass);
-					switch (callback)
+					if (Name.getText().length() !=0)
+					{
+						newAccount.setName(Name.getText());
+					}
+					if (Surname.getText().length() !=0)
+					{
+						newAccount.setSurname(Surname.getText());
+					}
+					if (!Country.getSelectedItem().toString().equals("Select country"))
+					{
+						newAccount.setCountry(Country.getSelectedItem().toString());
+					}
+					server.Change_skill(log, Skill_Convertion(Skill.getSelectedItem().toString()));
+					newAccount.setSkill(Skill_Convertion(Skill.getSelectedItem().toString()));
+					
+					if ((Integer)Age.getValue() != 0)
+					{
+						newAccount.setAge((Integer) Age.getValue());
+					}
+					
+					
+					File imgFile = Avatar.getSelectedFile();
+					if (imgFile != null &&!imgFile.getName().isEmpty() && imgFile.canRead() && imgFile.exists())
+					{
+						System.out.print("file exists\n");
+						ByteArrayOutputStream baos = new ByteArrayOutputStream();
+						String type;
+						BufferedImage img = ImageIO.read(imgFile);
+						int index = imgFile.getName().lastIndexOf('.');
+						type = imgFile.getName().substring(index+1);	
+						ImageIO.write(img, type, baos );
+						baos.flush();
+						byte[] imageInByte = baos.toByteArray();
+						baos.close();
+						newAccount.setAvatar(imageInByte);
+						newAccount.setType(Type_Convertion(type));
+					}
+					
+					if (Male.isSelected())
+					{
+						newAccount.setGender(SQLConstants.MALE);
+					}
+					else
+					{
+						newAccount.setGender(SQLConstants.FEMALE);
+					}
+					
+					int callback_2 = server.Register(newAccount);
+					switch (callback_2)
 					{
 					case CallbackConstants.USER_EXISTS:
 						JOptionPane.showMessageDialog(this, "User with such name already exists");
@@ -298,47 +340,19 @@ public class RegisterPanel extends JPanel implements ActionListener{
 					case CallbackConstants.BAD:
 						JOptionPane.showMessageDialog(this, "Registration error");
 						break;
-					case CallbackConstants.GOOD:
-						if (Name.getText().length() !=0)
-							server.Change_name(log, Name.getText());
-						if (Surname.getText().length() !=0)
-							server.Change_surname(log, Surname.getText());
-						if (!Country.getSelectedItem().toString().equals("Select country"))
-							server.Change_country(log, Country.getSelectedItem().toString());
-						
-						server.Change_skill(log, Skill_Convertion(Skill.getSelectedItem().toString()));
-						
-						if ((Integer)Age.getValue() != 0)
-						{
-							server.Change_age(log,(Integer) Age.getValue());
-						}
-						
-						
-						File imgFile = Avatar.getSelectedFile();
-						if (imgFile.exists())
-						{
-							System.out.print("file exists\n");
-							ByteArrayOutputStream baos = new ByteArrayOutputStream();
-							String type;
-							BufferedImage img = ImageIO.read(imgFile);
-							int index = imgFile.getName().lastIndexOf('.');
-							type = imgFile.getName().substring(index+1);	
-							ImageIO.write(img, type, baos );
-							baos.flush();
-							byte[] imageInByte = baos.toByteArray();
-							baos.close();
-							server.Change_avatar(log,imageInByte);
-							server.Set_type(log, Type_Convertion(type));
-						}
-						
-						if (Male.isSelected())
-							server.Change_gender(log, SQLConstants.MALE);
-						else
-							server.Change_gender(log, SQLConstants.FEMALE);
-						
-						JOptionPane.showMessageDialog(this, "A new user has been registered");
-						break;
 					}
+					JOptionPane.showMessageDialog(this, "A new user has been registered");
+					this.login.setText("");
+					this.password.setText("");
+					this.retype.setText("");
+					this.Name.setText("");
+					this.Surname.setText("");
+					this.Country.setSelectedIndex(0);
+					this.Skill.setSelectedIndex(0);
+					this.Age.setValue(0);
+					this.Avatar.setSelectedFile(new File(""));
+					this.Male.setSelected(true);
+					this.Female.setSelected(false);
 					parent.ShowLoginPane();
 				} catch (RemoteException e1) {
 					JOptionPane.showMessageDialog(this, "ERROR: Remote invocation error"); 

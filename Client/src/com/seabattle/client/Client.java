@@ -35,13 +35,13 @@ public class Client extends JFrame{
 		logPan = new LoginPanel(server,me,this);
 		regPan = new RegisterPanel(server,this);
 		
-		//TRYING TO GET IMAGE	  	
+		/*//TRYING TO GET IMAGE	  	
 		try {
-			byte[] accImg = server.getAvatar("asd");
+			byte[] accImg = server.getAvatar("zxc");
 			ByteArrayInputStream bais = new ByteArrayInputStream(accImg);
 			BufferedImage bufImg = ImageIO.read(bais);
 			StringBuffer sb = new StringBuffer();
-			sb.append("valik.jpg");
+			sb.append("kalitka.jpg");
 			ImageIO.write(bufImg, "jpg" ,new File(sb.toString()));
 		} catch (RemoteException e1) {
 			System.out.print("REMOTE ERROR\n");
@@ -50,7 +50,7 @@ public class Client extends JFrame{
 
 			System.out.print("IO ERROR\n");
 			e.printStackTrace();
-		}
+		}*/
 		
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setTitle("Seabattle");

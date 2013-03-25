@@ -20,7 +20,7 @@ public class Account implements Serializable
 		this.loses 	= 0;
 		this.login 	= _login;
 		this.Age	= 0;
-		this.setAvatar(null);
+		this.Avatar = null;
 		this.setType(SQLConstants.NOTYPE);
 		this.setCountry(new String());
 		this.Surname= new String();

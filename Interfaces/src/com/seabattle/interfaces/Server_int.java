@@ -175,5 +175,6 @@ public interface Server_int extends Remote
 	
 	
 	//TEST
+	int		Register(Account newAccount)						throws RemoteException;
 	byte[] getAvatar(String login)								throws RemoteException;
 }
